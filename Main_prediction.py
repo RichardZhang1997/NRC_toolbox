@@ -11,8 +11,6 @@ from datetime import date, timedelta, datetime
 
 class Ordinary_input:
     def __init__(self, master, param_dict):
-        today = date.today()
-        
         self.master = master
         self.master.title('New Model Training Tool-General Settings')
         self.master.geometry('1000x700')
@@ -26,19 +24,25 @@ class Ordinary_input:
         
         e_font = 12
         
-        dft_e_1 = tk.StringVar(value='D:\\MyFile\\MineDataFeatures.csv')#1. Address of input features
-        dft_e_2 = tk.StringVar(value='D:\\MyFile\\MineDataTarget.csv')#2. Address of the target feature
-        dft_e_3 = tk.StringVar(value='2, 3, 4, ...')#3. Features use columns, exclude date column
-        dft_e_4 = tk.StringVar(value='2')#4. Target use column, exclude date column
-        dft_e_5 = tk.StringVar(value='1')#5. Datetime column of features
-        dft_e_6 = tk.StringVar(value='1')#6. Datetime column of target
-        dft_e_7 = tk.StringVar(value='1.8')#7. Flow rate threshold for spring freshet
-        dft_e_8 = tk.StringVar(value=(today-timedelta(days=365)).strftime('%Y-%m-%d'))#8. Date when training set starts 
-        dft_e_9 = tk.StringVar(value=(today-timedelta(days=31)).strftime('%Y-%m-%d'))#9. Date when test set starts
-        dft_e_10 = tk.StringVar(value=today.strftime('%Y-%m-%d'))#10. Date when test set ends
-        dft_e_11 = tk.StringVar(value='D:\\MyFile\\MineData\\Output')#11. Output file directory
-        self.dft_r_12 = tk.IntVar(value=1)#12. Training model selection: automatic (0) VS manual (1)
-        dft_e_13 = tk.StringVar(value='Station_1_trial_1')#13. Station name
+        dft_e_1 = tk.StringVar(value=self.param_dict['dir_features'])#1. Address of input features
+        dft_e_2 = tk.StringVar(value=self.param_dict['dir_target'])#2. Address of the target feature
+        dft_e_3 = tk.StringVar(value=self.param_dict['use_col_features'])#3. Features use columns, exclude date column
+        dft_e_4 = tk.StringVar(value=self.param_dict['use_col_target'])#4. Target use column, exclude date column
+        dft_e_5 = tk.StringVar(value=self.param_dict['use_col_fea_date'])#5. Datetime column of features
+        dft_e_6 = tk.StringVar(value=self.param_dict['use_col_tar_date'])#6. Datetime column of target
+        dft_e_7 = tk.StringVar(value=self.param_dict['flowrate_threshold'])#7. Flow rate threshold for spring freshet
+        dft_e_8 = tk.StringVar(value=self.param_dict['train_startDate'])#8. Date when training set starts 
+        dft_e_9 = tk.StringVar(value=self.param_dict['test_startDate'])#9. Date when test set starts
+        dft_e_10 = tk.StringVar(value=self.param_dict['endDate'])#10. Date when test set ends
+        dft_e_11 = tk.StringVar(value=self.param_dict['dir_output'])#11. Output file directory
+        
+        #12. Training model selection: automatic (0) VS manual (1)
+        if self.param_dict['train_mode'] == 'manual':
+            self.dft_r_12 = tk.IntVar(value=1)
+        elif self.param_dict['train_mode'] == 'automatic':
+            self.dft_r_12 = tk.IntVar(value=0)
+        
+        dft_e_13 = tk.StringVar(value=self.param_dict['station'])#13. Station name
         
         #Left
         #1. Address of input features
@@ -160,6 +164,8 @@ class Ordinary_input:
         
         self.btn_conf = tk.Button(self.frm_bottom, text = 'Confirm & Run', 
                                   width = 25, command = self.confirm_btn).pack()
+        self.btn_quit = tk.Button(self.frm_bottom, text = 'Quit', width = 25, 
+                                  command = self.close_windows).pack()
         
         self.frm_left.pack(side='left')
         self.frm_right.pack(side='right')
@@ -235,6 +241,10 @@ input them into 'advanced settings' to save time.''')
         except Exception as ex:
             messagebox.showerror(title='Failed to update ordinary parameters', message=ex)
             return
+        return
+    
+    def close_windows(self):
+        self.master.destroy()
         return
 
 class Additional_input:
@@ -453,8 +463,22 @@ class model_main:
 
 def main(): 
     #Default values for ordinary/advance parameters setting
+    today = date.today()
     param_dict = {
         #Ordinary parameters
+        'dir_features': 'D:\\MyFile\\MineDataFeatures.csv',
+        'dir_target': 'D:\\MyFile\\MineDataTarget.csv',
+        'use_col_features': '2, 3, 4',#should be a list[] latter
+        'use_col_target': 2,
+        'use_col_fea_date': 1,
+        'use_col_tar_date': 1,
+        'flowrate_threshold': 1.8,
+        'train_startDate': (today-timedelta(days=365)).strftime('%Y-%m-%d'),
+        'test_startDate': (today-timedelta(days=31)).strftime('%Y-%m-%d'),
+        'endDate': today.strftime('%Y-%m-%d'),
+        'dir_output': 'D:\\MyFile\\MineData\\Output',
+        'train_mode': 'manual',
+        'station': 'Station_1_trial_1',
         
         #Advanced parameters
         'tree_avg_days': 1, #SF average days
