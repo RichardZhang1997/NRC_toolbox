@@ -290,7 +290,7 @@ def confm_button():
             date_col = int(e_4.get())-No_lin
         
         data['Datetime'] = pd.to_datetime(data[raw_data.columns[date_col]], 
-                              format='%Y-%m-%d')
+                              format='%Y/%m/%d')
         data.drop(raw_data.columns[date_col], 1, inplace=True)
         
         #print('Datetime column:\n', data['Datetime'])
