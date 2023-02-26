@@ -12,7 +12,10 @@ from datetime import date, timedelta, datetime
 import os
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+
 from sklearn.impute import SimpleImputer
 
 #from sklearn.model_selection import GridSearchCV
@@ -24,7 +27,7 @@ from tensorflow.keras.layers import Dense, LSTM, GRU
 from tensorflow.keras.constraints import max_norm
 import tensorflow as tf
 
-from tensorflow.keras.wrappers.scikit_learn import KerasRegressor
+#from tensorflow.keras.wrappers.scikit_learn import KerasRegressor
 from tensorflow.keras.callbacks import ModelCheckpoint
 
 class Ordinary_input:
@@ -111,16 +114,8 @@ class Ordinary_input:
                               font=('Times New Roman', 12), height=1).pack()
         self.e_11 = tk.Entry(self.frm_left, show="", width=40, font=e_font, textvariable=dft_e_11)
         self.e_11.pack()
-        
-        #13. Station name
-        var_L_13 = tk.StringVar()
-        var_L_13.set('13. Please type in a name of the station/trail:')
-        self.Lab_13 = tk.Label(self.frm_left, textvariable=var_L_13, bg='white', 
-                              font=('Times New Roman', 12), height=1).pack()
-        self.e_13 = tk.Entry(self.frm_left, show="", width=20, font=e_font, textvariable=dft_e_13)
-        self.e_13.pack()
-        
-        
+            
+    
         
         #Right
         #2. Address of the target feature
@@ -164,8 +159,9 @@ class Ordinary_input:
         self.e_10.pack()
         
         #12. Training model selection: automatic (0) VS manual (1)
+        '''
         self.var_L_12 = tk.StringVar()
-        self.var_L_12.set('12. Training model selection: ')
+        self.var_L_12.set('12. Training model selection (Manual mode):')
         self.Lab_12 = tk.Label(self.frm_right, textvariable=self.var_L_12, bg='white', 
                               font=('Times New Roman', 12), height=1).pack()
         self.r_12_1 = tk.Radiobutton(self.frm_right, text='Automatic', variable=self.dft_r_12, value=0,
@@ -174,8 +170,14 @@ class Ordinary_input:
                     command=self.print_r_12_selection)#.place(x=190, y=705, anchor='nw')
         self.r_12_1.pack()
         self.r_12_2.pack()
-        
-        
+        '''
+        #13. Station name
+        var_L_13 = tk.StringVar()
+        var_L_13.set('12. Please type in a name of the station/trail:')
+        self.Lab_13 = tk.Label(self.frm_right, textvariable=var_L_13, bg='white', 
+                              font=('Times New Roman', 12), height=1).pack()
+        self.e_13 = tk.Entry(self.frm_right, show="", width=20, font=e_font, textvariable=dft_e_13)
+        self.e_13.pack()
         
         #Bottom
         self.btn_advSet = tk.Button(self.frm_bottom, text = 'Advanced Settings', 
@@ -183,10 +185,10 @@ class Ordinary_input:
         
         self.btn_conf = tk.Button(self.frm_bottom, text = 'Confirm & Run', 
                                   width = 25, command = self.confirm_btn).pack()
-        
+        '''
         self.btn_loadRst = tk.Button(self.frm_bottom, text = 'Load Previous Training Results', 
                                   width = 25, command = self.new_window_load).pack()
-        
+        '''
         self.btn_quit = tk.Button(self.frm_bottom, text = 'Quit', width = 25, 
                                   command = self.close_windows).pack()
         
@@ -215,13 +217,13 @@ class Ordinary_input:
         return
     
     def new_window_add(self):
-        self.newWindow = tk.Toplevel(self.master)
-        self.app = Additional_input(self.newWindow, self.param_dict)
+        newWindow = tk.Toplevel(self.master)
+        self.app = Additional_input(newWindow, self.param_dict)
         return
     
     def new_window_load(self):
-        self.newWindow = tk.Toplevel(self.master)
-        self.app = Load_results(self.newWindow, self.param_dict)
+        newWindow = tk.Toplevel(self.master)
+        self.app = Load_results(newWindow, self.param_dict)
         return
     
     def confirm_btn(self):
@@ -267,7 +269,7 @@ class Ordinary_input:
             messagebox.showinfo(title='All parameters updated', 
                                 message='All parameters have been updated successfully.')
             
-            self.app = model_main(self.param_dict)
+            self.app = model_main(self.master, self.param_dict)
         except Exception as ex:
             messagebox.showerror(title='Failed to update ordinary parameters', message=ex)
             return
@@ -331,7 +333,7 @@ class Additional_input:
         '''
         #2. Flow/concentration average days
         var_L_2 = tk.StringVar()
-        var_L_2.set('2. Flow rate average days:')
+        var_L_2.set('1. Flow rate average days:')
         self.Lab_2 = tk.Label(self.frm_left, textvariable=var_L_2, bg='white', 
                               font=('Times New Roman', 12), height=1).pack()
         self.e_2 = tk.Entry(self.frm_left, show="", width=10, font=e_font, textvariable=dft_e_2)
@@ -339,7 +341,7 @@ class Additional_input:
         
         #3. Time step
         var_L_3 = tk.StringVar()
-        var_L_3.set('3. Time step for the recurrent neural network (RNN):')
+        var_L_3.set('2. Time step for the recurrent neural network (RNN):')
         self.Lab_3 = tk.Label(self.frm_left, textvariable=var_L_3, bg='white', 
                               font=('Times New Roman', 12), height=1).pack()
         self.e_3 = tk.Entry(self.frm_left, show="", width=10, font=e_font, textvariable=dft_e_3)
@@ -347,7 +349,7 @@ class Additional_input:
         
         #4. Gap days
         var_L_4 = tk.StringVar()
-        var_L_4.set('4. Gap days between the end of input and the target date:')
+        var_L_4.set('3. Gap days between the end of input and the target date:')
         self.Lab_4 = tk.Label(self.frm_left, textvariable=var_L_4, bg='white', 
                               font=('Times New Roman', 12), height=1).pack()
         self.e_4 = tk.Entry(self.frm_left, show="", width=10, font=e_font, textvariable=dft_e_4)
@@ -355,7 +357,7 @@ class Additional_input:
         
         #5. Random seed
         var_L_5 = tk.StringVar()
-        var_L_5.set('5. The seed to generate random numbers:')
+        var_L_5.set('4. The seed to generate random numbers:')
         self.Lab_5 = tk.Label(self.frm_left, textvariable=var_L_5, bg='white', 
                               font=('Times New Roman', 12), height=1).pack()
         self.e_5 = tk.Entry(self.frm_left, show="", width=10, font=e_font, textvariable=dft_e_5)
@@ -363,7 +365,7 @@ class Additional_input:
         
         #6. Learning rate in Adam optimizer
         var_L_6 = tk.StringVar()
-        var_L_6.set('6. Learning rate in Adam optimizer for training RNNs:')
+        var_L_6.set('5. Learning rate in Adam optimizer for training RNNs:')
         self.Lab_6 = tk.Label(self.frm_left, textvariable=var_L_6, bg='white', 
                               font=('Times New Roman', 12), height=1).pack()
         self.e_6 = tk.Entry(self.frm_left, show="", width=10, font=e_font, textvariable=dft_e_6)
@@ -371,7 +373,7 @@ class Additional_input:
         
         #8. No. of hidden states
         var_L_8 = tk.StringVar()
-        var_L_8.set('7. No. of hidden states in the fully connected layer of RNNs:')
+        var_L_8.set('6. No. of hidden states in the fully connected layer of RNNs:')
         self.Lab_8 = tk.Label(self.frm_left, textvariable=var_L_8, bg='white', 
                               font=('Times New Roman', 12), height=1).pack()
         self.e_8 = tk.Entry(self.frm_left, show="", width=10, font=e_font, textvariable=dft_e_8)
@@ -379,7 +381,7 @@ class Additional_input:
         
         #9. Recurrent dropout rate
         var_L_9 = tk.StringVar()
-        var_L_9.set('8. Recurrent dropout rate:')
+        var_L_9.set('7. Recurrent dropout rate:')
         self.Lab_9 = tk.Label(self.frm_left, textvariable=var_L_9, bg='white', 
                               font=('Times New Roman', 12), height=1).pack()
         self.e_9 = tk.Entry(self.frm_left, show="", width=10, font=e_font, textvariable=dft_e_9)
@@ -387,7 +389,7 @@ class Additional_input:
         
         #10. Max_norm constraint
         var_L_10 = tk.StringVar()
-        var_L_10.set('9. Max_norm constraint:')
+        var_L_10.set('8. Max_norm constraint:')
         self.Lab_10 = tk.Label(self.frm_left, textvariable=var_L_10, bg='white', 
                                font=('Times New Roman', 12), height=1).pack()
         self.e_10 = tk.Entry(self.frm_left, show="", width=10, font=e_font, textvariable=dft_e_10)
@@ -395,7 +397,7 @@ class Additional_input:
         
         #11. Batch size
         var_L_11 = tk.StringVar()
-        var_L_11.set('10. Batch size:')
+        var_L_11.set('9. Batch size:')
         self.Lab_11 = tk.Label(self.frm_left, textvariable=var_L_11, bg='white', 
                                font=('Times New Roman', 12), height=1).pack()
         self.e_11 = tk.Entry(self.frm_left, show="", width=10, font=e_font, textvariable=dft_e_11)
@@ -403,7 +405,7 @@ class Additional_input:
         
         #12. Max epoches
         var_L_12 = tk.StringVar()
-        var_L_12.set('11. Maximum No. of epochs:')
+        var_L_12.set('10. Maximum No. of epochs:')
         self.Lab_12 = tk.Label(self.frm_left, textvariable=var_L_12, bg='white', 
                                font=('Times New Roman', 12), height=1).pack()
         self.e_12 = tk.Entry(self.frm_left, show="", width=10, font=e_font, textvariable=dft_e_12)
@@ -411,7 +413,7 @@ class Additional_input:
         
         #13. Validation frequency
         var_L_13 = tk.StringVar()
-        var_L_13.set('12. Validation frequency (validate after how many epochs):')
+        var_L_13.set('11. Validation frequency (validate after how many epochs):')
         self.Lab_13 = tk.Label(self.frm_left, textvariable=var_L_13, bg='white', 
                                font=('Times New Roman', 12), height=1).pack()
         self.e_13 = tk.Entry(self.frm_left, show="", width=10, font=e_font, textvariable=dft_e_13)
@@ -419,7 +421,7 @@ class Additional_input:
         
         #7. Recurrent type
         self.var_L_7 = tk.StringVar()
-        self.var_L_7.set('13. RNN type:')
+        self.var_L_7.set('12. RNN type (LSTM selected):')
         self.Lab_7 = tk.Label(self.frm_left, textvariable=self.var_L_7, bg='white', 
                               font=('Times New Roman', 12), height=1).pack()
         self.r_7_1 = tk.Radiobutton(self.frm_left, text='LSTM', variable=self.dft_r_7, value=0,
@@ -482,82 +484,10 @@ class Additional_input:
         self.master.destroy()
         return
 
-class Load_results:#To be finished
-    def __init__(self, master, param_dict):
-        self.master = master
-        self.param_dict = param_dict
-        
-        self.frm_left = tk.Frame(self.master)
-        self.frm_right = tk.Frame(self.master)
-        self.frm_bottom = tk.Frame(self.master)
-        
-        self.master.title('RNN Model Training Tool-Advanced Settings')
-        self.master.geometry('580x800')
-        
-        self.frm_left.pack(side='left')
-        self.frm_right.pack(side='right')
-        self.frm_bottom.pack(side='bottom')
-        
-        #Default values of additional input
-        #dft_e_1 = tk.IntVar(value=self.param_dict['tree_avg_days'])#SF average days
-        
-        '''
-        #1. SF average days
-        var_L_1 = tk.StringVar()
-        var_L_1.set('1. Spring freshet average days:')
-        self.Lab_1 = tk.Label(self.frm_left, textvariable=var_L_1, bg='white', 
-                              font=('Times New Roman', 12), height=1).pack()
-        self.e_1 = tk.Entry(self.frm_left, show="", width=10, font=e_font, textvariable=dft_e_1)
-        self.e_1.pack()
-        '''
-        
-        #Bottom
-        #1. Update
-        self.btn_update = tk.Button(self.frm_right, text = 'Update', width = 25, 
-                                  command = self.update_adv).pack()
-        #2. Quit
-        self.btn_quit = tk.Button(self.frm_right, text = 'Quit', width = 25, 
-                                  command = self.close_windows).pack()
-        return
-    
-    
-    def update_adv(self):
-        try:
-            self.param_dict['RNN_avg_days_flow'] = int(self.e_2.get())
-            self.param_dict['time_step_flow'] = int(self.e_3.get())
-            self.param_dict['gap_days_flow'] = int(self.e_4.get())
-            self.param_dict['learning_rate_flow'] = float(self.e_6.get())
-            if self.dft_r_7.get() == 1:#RNN type; 0 for LSTM and 1 for GRU; by default: 0
-                self.param_dict['recurrent_type_flow'] = 'GRU'
-            else:
-                self.param_dict['recurrent_type_flow'] = 'LSTM'
-            #print(self.param_dict['recurrent_type'])
-            self.param_dict['hidden_states_flow'] = int(self.e_8.get())
-            self.param_dict['dropout_rate_flow'] = float(self.e_9.get())
-            self.param_dict['constraint_flow'] = int(self.e_10.get())
-            self.param_dict['batch_size_flow'] = int(self.e_11.get())
-            self.param_dict['max_epochs_flow'] = int(self.e_12.get())
-            #print(self.param_dict)
-            
-            #common
-            #self.param_dict['tree_avg_days'] = int(self.e_1.get())
-            self.param_dict['seed'] = int(self.e_5.get())
-            self.param_dict['validation_freq'] = int(self.e_13.get())
-            
-            messagebox.showinfo(title='Advanced parameters updated', 
-                                message='All advanced parameters have been updated successfully.')
-        except Exception as ex:
-            messagebox.showerror(title='Failed to update advanced parameters', message=ex)
-            return
-        
-        return
-    
-    def close_windows(self):
-        self.master.destroy()
-        return
 
 class model_main:
-    def __init__(self, param_dict):
+    def __init__(self, master, param_dict):
+        self.master = master
         self.param_dict = param_dict
         
         #print(self.param_dict)
@@ -619,6 +549,7 @@ class model_main:
         # =============================================================================
         #Read flow rate file
         try:
+            print(dir_tar)
             flowrate = pd.read_csv(filepath_or_buffer=dir_tar, 
                         usecols=[use_col_date-1])
             flowrate.columns = ['Datetime']
@@ -632,8 +563,7 @@ class model_main:
             flowrate.dropna(inplace=True)
             
             print('Target:\n', flowrate)#for testing
-
-            path_prep = self.createFolder_ifNotExist(folder_name="Target", 
+            path_prep = self.createFolder_ifNotExist(folder_name='Target', 
                                                      dir_output=dir_output+'\\Pre-processed Data')
             flowrate.to_csv(path_or_buf = path_prep+'\\'+station+'_target_'+'.csv',
                             index=False)
@@ -785,7 +715,7 @@ class model_main:
         print('The training will at most stop at epoch:', max_epochs)
         #print('Training the LSTM without monitoring the validation set...')
         
-        path_rst_stn = self.createFolder_ifNotExist(folder_name=str(station), 
+        path_rst_stn = self.createFolder_ifNotExist(folder_name=station, 
                                                     dir_output=dir_output+'\\Model Training Results')
         
         #create LSTM/GRU
@@ -795,27 +725,27 @@ class model_main:
                                     dropoutRate=dropout_rate,
                                     constraints=constraint)
             
-            checkpoint = ModelCheckpoint(path_rst_stn+'\\RNN_weights_at_epoch_{epoch:02d}', #to be fixed
+            checkpoint = ModelCheckpoint(path_rst_stn+'\\LSTM_weights_at_epoch_{epoch:2d}', #to be fixed
                                          monitor='val_loss', verbose=1, 
                                          save_best_only=False, save_weights_only=True, 
                                          mode='auto', save_freq='epoch')
         elif recurrent_type == 'GRU':
             print('Creating GRU...')
-            regressor = self.create_GRU(neurons=hidden_states,
+            regressor = self.create_GRU(optimizer=opt, neurons=hidden_states,
                                     dropoutRate=dropout_rate,
                                     constraints=constraint)
         
-            checkpoint = ModelCheckpoint(path_rst_stn+'\\RNN_weights_at_epoch_{epoch:02d}', 
+            checkpoint = ModelCheckpoint(path_rst_stn+'\\GRU_weights_at_epoch_{epoch:2d}', 
                                          monitor='val_loss', verbose=1, 
                                          save_best_only=False, save_weights_only=True, 
                                          mode='auto', save_freq='epoch')
         else:
             print('Wrong recurrent type, go with LSTM anyway.')
-            regressor = self.create_LSTM(neurons=hidden_states,
+            regressor = self.create_LSTM(optimizer=opt, neurons=hidden_states,
                                     dropoutRate=dropout_rate,
                                     constraints=constraint)
             
-            checkpoint = ModelCheckpoint(path_rst_stn+'\\RNN_weights_at_epoch_{epoch:02d}', 
+            checkpoint = ModelCheckpoint(path_rst_stn+'\\LSTM_weights_at_epoch_{epoch:2d}', 
                                          monitor='val_loss', verbose=1, 
                                          save_best_only=False, save_weights_only=True, 
                                          mode='auto', save_freq='epoch')
@@ -841,18 +771,42 @@ class model_main:
         print(loss_history)
         print('Traning and validation loss has been saved.')
         
+        #Find the best_epoch, which has the lowest validation_loss and pass it to param_dict
+        min_loss = loss_history.loc[0,'validation_loss']
+        best_epoch = 1
+        for i in range(1, len(loss_history)):
+            #print(i)
+            if loss_history.loc[i,'validation_loss'] < min_loss:
+                min_loss = loss_history.loc[i,'validation_loss']
+                best_epoch = int(loss_history.loc[i,'epoch'])
         
-      
+        self.param_dict['best_epoch'] = best_epoch
+        print('The best epoch is: ', best_epoch)
+        
+        #Load the best epoch to predict
+        try:
+            if recurrent_type == 'GRU':
+                regressor.load_weights(path_rst_stn+'\\GRU_weights_at_epoch_ '+
+                                       str(best_epoch))#Skip compiling and fitting process
+                print('GRU loaded successfully.')
+            else:
+                regressor.load_weights(path_rst_stn+'\\LSTM_weights_at_epoch_ '+
+                                       str(best_epoch))#Skip compiling and fitting process
+                print('LSTM loaded successfully.')
+        except Exception as ex:
+            messagebox.showerror(title='Failed to load the best model training results at epoch: '+str(best_epoch), message=ex)
+            return
+
         sc_flow = MinMaxScaler(feature_range=(0, 1), copy=True)
         sc_flow.fit_transform(np.array(y_train_not_scaled).reshape(-1, 1))
         
         y_pred_scaled = regressor.predict(X_test)
-        y_pred = sc_flow.inverse_transform(y_pred_scaled)
+        y_pred_test = sc_flow.inverse_transform(y_pred_scaled)
         
         y_pred_scaled_train = regressor.predict(X_train)
         y_pred_train = sc_flow.inverse_transform(y_pred_scaled_train)
         
-        path_pred = self.createFolder_ifNotExist(folder_name=str(station), 
+        path_pred = self.createFolder_ifNotExist(folder_name=station, 
                                 dir_output=dir_output+'\\Model Predictions') 
         
         # Saving prediction on train set
@@ -862,45 +816,71 @@ class model_main:
                                  index=False)
 
         # Saving prediction on test set
-        pred_train = pd.DataFrame(np.c_[datetime_test_deNull,y_test_not_scaled,y_pred],
+        pred_test = pd.DataFrame(np.c_[datetime_test_deNull,y_test_not_scaled,y_pred_test],
                                   columns = ['Datetime','Target_test_real','Target_test_pred'])
-        pred_train.to_csv(path_or_buf = path_pred+'\\Test_Data.csv',
+        pred_test.to_csv(path_or_buf = path_pred+'\\Test_Data.csv',
                                  index=False)
+        
+        print('RMSE on training set:')
+        self.rootMSE(y_test=y_train_not_scaled, y_pred=y_pred_train)
+        
+        print('RMSE on test set:')
+        self.rootMSE(y_test=y_test_not_scaled, y_pred=y_pred_test)
 
+        messagebox.showinfo(title='Model Training Finished Successfully', 
+                            message='Training results for station '+station+
+                            ' have been saved at the folder: '+path_pred)
         # =============================================================================
         # Plotting
         # =============================================================================
-        plt.plot(range(1,max_epochs+1), r.history['loss'], label='loss')
-        plt.plot(np.linspace(0,max_epochs,
+        # Create a new Tkinter window to display figures
+        newWindow = tk.Toplevel(self.master)
+        newWindow.title("Matplotlib with Tkinter")
+        
+        # Create a new matplotlib figure and plot some data
+        #1. train loss plot
+        fig_1 = Figure(figsize=(8, 6), dpi=100)
+        ax_1 = fig_1.add_subplot(111)
+        
+        ax_1.plot(range(1,max_epochs+1), r.history['loss'], label='loss')
+        ax_1.plot(np.linspace(0,max_epochs,
                              int(max_epochs/validation_freq)+1,endpoint=True)[1:int(int(max_epochs/validation_freq)+1)], 
                  r.history['val_loss'], label='val_loss')
-        plt.legend()
-        plt.show()
+        ax_1.set_title('Train MSE Loss')
+        ax_1.set_xlabel('No. of epoches')
+        ax_1.set_ylabel('Mean square error')
+        ax_1.legend()
         
+        canvas_1 = FigureCanvasTkAgg(fig_1, master=newWindow)
+        canvas_1.draw()
         
+        #2. prediction results on training set
+        fig_2 = Figure(figsize=(8, 6), dpi=100)
+        ax_2 = fig_2.add_subplot(111)
         
+        ax_2.plot(datetime_train_deNull, y_train_not_scaled, label='Monitored data-training set')
+        ax_2.plot(datetime_train_deNull, y_pred_train, label='Predicted data-training set')
+        ax_2.plot(datetime_test_deNull, y_test_not_scaled, label='Monitored data-testing set')
+        ax_2.plot(datetime_test_deNull, y_pred_test, label='Predicted data-testing set')
         
+        ax_2.set_title('Monitored and predicted data')
+        ax_2.set_xlabel('Date')
+        ax_2.set_ylabel('Target')
+        ax_2.legend()
         
-        
-        
-        
+        canvas_2 = FigureCanvasTkAgg(fig_2, master=newWindow)
+        canvas_2.draw()
+
+        canvas_1.get_tk_widget().pack(side=tk.LEFT)
+        canvas_2.get_tk_widget().pack(side=tk.LEFT)
+
         return#return to run_flow
     
 
     # =============================================================================
     # Other functions
     # =============================================================================
-    def accuracy_print_conf(y_test, y_pred):
-        from sklearn.metrics import confusion_matrix, accuracy_score
-        conf_matrix = confusion_matrix(y_test.astype('int'), y_pred.astype('int'))
-        #separately print out confusion matrix
-        #tn, fp, fn, tp = confusion_matrix(y_test.astype('int'), y_pred.astype('int')).ravel()
-        print('The confusion matrix is:\n', conf_matrix)
-        accuracy = accuracy_score(y_test.astype('int'), y_pred.astype('int'))
-        print('The accuracy is: %2.2f' % accuracy)
-        return accuracy
-    
-    def rootMSE(y_test, y_pred):
+    def rootMSE(self, y_test, y_pred):
         import math
         from sklearn.metrics import mean_squared_error
         rmse = math.sqrt(mean_squared_error(y_test, y_pred))
@@ -910,7 +890,7 @@ class model_main:
         print('Real results length:', y_test.shape)
         return rmse
     
-    def createFolder_ifNotExist(folder_name, dir_output):
+    def createFolder_ifNotExist(self, folder_name, dir_output):
         try:
             folder_name = str(folder_name)
             path = os.path.join(dir_output, folder_name)
@@ -925,7 +905,7 @@ class model_main:
             return
         
     #@tf.function
-    def create_LSTM(optimizer, neurons, dropoutRate, constraints):
+    def create_LSTM(self, optimizer, neurons, dropoutRate, constraints):
         # Ignore the WARNING here, numpy version problem
         
         # Initializing the RNN
@@ -943,7 +923,7 @@ class model_main:
         regressor.compile(loss='mean_squared_error', optimizer=optimizer, metrics=['mse'])#adam to be changed
         return regressor
     
-    def create_GRU(optimizer, neurons, dropoutRate, constraints):
+    def create_GRU(self, optimizer, neurons, dropoutRate, constraints):
         # Ignore the WARNING here, numpy version problem
         
         # Initializing the RNN
@@ -961,9 +941,113 @@ class model_main:
         regressor.compile(loss='mean_squared_error', optimizer=optimizer, metrics=['mse'])#adam to be changed
         return regressor
 
-    # =============================================================================
+class Load_results(model_main):#To be finished
+    def __init__(self, master, param_dict):
+        self.master = master
+        self.param_dict = param_dict
+        
+        #If did not record the best_epoch from run_RNN
+        if self.param_dict['best_epoch'] == 0:
+            self.param_dict['best_epoch'] = self.param_dict['max_epochs_flow']
+
+        self.frm_left = tk.Frame(self.master)
+        self.frm_right = tk.Frame(self.master)
+        self.frm_bottom = tk.Frame(self.master)
+        
+        self.master.title('RNN Model Training Tool-Load Previous Results')
+        self.master.geometry('580x800')
+        
+        self.frm_left.pack(side='left')
+        self.frm_right.pack(side='right')
+        self.frm_bottom.pack(side='bottom')
+        
+        e_font = 12
+        
+        # =============================================================================
+        # Default values of results loading
+        # =============================================================================
+        if self.param_dict['recurrent_type_flow'] == 'GRU':#RNN type; 0 for LSTM and 1 for GRU; by default: 0
+            self.dft_r_7 = tk.IntVar(value=1)
+        else:
+            self.dft_r_7 = tk.IntVar(value=0)
+        
+        dft_e_11 = tk.StringVar(value=self.param_dict['dir_output'])#11. Output file directory
+        
+        dft_e_13 = tk.StringVar(value=self.param_dict['station'])#13. Station name
+        
+        # =============================================================================
+        # Construct labels and entries 
+        # =============================================================================
+        #7. Recurrent type
+        self.var_L_7 = tk.StringVar()
+        self.var_L_7.set('1. RNN type:')
+        self.Lab_7 = tk.Label(self.frm_left, textvariable=self.var_L_7, bg='white', 
+                              font=('Times New Roman', 12), height=1).pack()
+        self.r_7_1 = tk.Radiobutton(self.frm_left, text='LSTM', variable=self.dft_r_7, value=0,
+                    command=self.print_r_7_selection)#.place(x=130, y=705, anchor='nw')
+        self.r_7_2 = tk.Radiobutton(self.frm_left, text='GRU', variable=self.dft_r_7, value=1,
+                    command=self.print_r_7_selection)#.place(x=190, y=705, anchor='nw')
+        self.r_7_1.pack()
+        self.r_7_2.pack()
+        
+        #11. Output file directory
+        var_L_11 = tk.StringVar()
+        var_L_11.set('2. Output file directory:')
+        self.Lab_11 = tk.Label(self.frm_left, textvariable=var_L_11, bg='white', 
+                              font=('Times New Roman', 12), height=1).pack()
+        self.e_11 = tk.Entry(self.frm_left, show="", width=40, font=e_font, textvariable=dft_e_11)
+        self.e_11.pack()
+        
+        #13. Station name
+        var_L_13 = tk.StringVar()
+        var_L_13.set('13. Please type in a name of the station/trail:')
+        self.Lab_13 = tk.Label(self.frm_left, textvariable=var_L_13, bg='white', 
+                              font=('Times New Roman', 12), height=1).pack()
+        self.e_13 = tk.Entry(self.frm_left, show="", width=20, font=e_font, textvariable=dft_e_13)
+        self.e_13.pack()
+        
+        
+        
+        
+        #Bottom
+        #1. Update
+        self.btn_updateRst = tk.Button(self.frm_right, text = 'Load', width = 25, 
+                                  command = self.load_weight).pack()
+        #2. Quit
+        self.btn_quit = tk.Button(self.frm_right, text = 'Quit', width = 25, 
+                                  command = self.close_windows).pack()
+        return
+    
+    
+    def load_weight(self):
+        try:
+            #self.param_dict['RNN_avg_days_flow'] = int(self.e_2.get())
+            
+                        
+            messagebox.showinfo(title='Previous Training Results Loaded', 
+                                message='All advanced parameters have been updated successfully.')
+        except Exception as ex:
+            messagebox.showerror(title='Failed to update advanced parameters', message=ex)
+            return
+        
+        return
+    
+    def print_r_7_selection(self):
+        if self.dft_r_7.get() == 0:
+            str_print = '1. RNN type (LSTM selected):'
+        elif self.dft_r_7.get() == 1:
+            str_print = '1. RNN type (GRU selected):'
+        
+        self.var_L_7.set(str_print)
+        return
+    
+    def close_windows(self):
+        self.master.destroy()
+        return
+
 def main(): 
     #Default values for ordinary/advanced parameters settings
+    '''
     today = date.today()
     param_dict = {
         #Ordinary parameters
@@ -1001,7 +1085,7 @@ def main():
         'constraint_flow': 99, #Max_norm constraint
         'batch_size_flow': 4, #Batch size
         'max_epochs_flow': 100, #Max epoches
-        'best_epoch': 100, 
+        'best_epoch': 0, #0 as initial value
         #conc
         
         
@@ -1010,7 +1094,54 @@ def main():
         #'tree_avg_days': 1, #SF average days
         'seed': 29#Random seed
                   }
-    
+    '''
+    #for testing
+    param_dict = {
+        #Ordinary parameters
+        #flow
+        'dir_tar_flow': 'D:\\Study\\PhD_Project\\NRC_toolbox\\Testing\\Input\\Flowrate_test.csv',#2. Address of the flow rate target 
+        'use_col_flow': 4,#4. Flowrate use column, exclude date column
+        'use_col_flow_date': 3,#6. Datetime column of target
+        #conc
+        #'dir_tar_conc': 'D:\\MyFile\\MineDataConc.csv',#*. Address of the concentration target
+        #'use_col_conc': 2,#4. Target use column, exclude date column
+        #'use_col_conc_date': 1,#6. Datetime column of target
+        
+        #common
+        'dir_features': 'D:\\Study\\PhD_Project\\NRC_toolbox\\Testing\\Input\\Weather_test.csv',#1. Address of input features
+        'use_col_features': '5,6,7,8,9',#3. Features use columns, exclude date column, should be a list[] 
+        'use_col_fea_date': 1,#5. Datetime column of features
+        #'flowrate_threshold': 1.8,#7. Flow rate threshold for spring freshet
+        'train_startDate': '1997/01/01',#8. Date when training set starts 
+        'train_endDate': '1997/10/31',#8. Date when training set ends
+        'test_startDate': '1997/10/31',#9. Date when test set starts
+        'test_endDate': '1997/12/31',#10. Date when test set ends
+        'dir_output': 'D:\\Study\\PhD_Project\\NRC_toolbox\\Testing\\Results',#11. Output file directory
+        'train_mode_flow': 'manual',#12. Training model selection: automatic (0) VS manual (1)
+        'station': 'APP_test_1',#13. Station name
+        
+        #Advanced parameters
+        #flow
+        'RNN_avg_days_flow': 6, #Flow rate/concentration average days
+        'time_step_flow': 10, #Time step for LSTM/GRU
+        'gap_days_flow': 0, #gap days between the end of input date and the target date
+        'learning_rate_flow': 2e-4, #Learning rate in Adam optimizer
+        'recurrent_type_flow': 'LSTM', #RNN type; 0 for LSTM and 1 for GRU; by default: 0
+        'hidden_states_flow': 50, #No. of hidden states
+        'dropout_rate_flow': 0.1, #Recurrent dropout rate
+        'constraint_flow': 99, #Max_norm constraint
+        'batch_size_flow': 4, #Batch size
+        'max_epochs_flow': 5, #Max epoches
+        'best_epoch': 0, #0 as initial value
+        #conc
+        
+        
+        #common
+        'validation_freq': 1,#Validation frequency
+        #'tree_avg_days': 1, #SF average days
+        'seed': 29#Random seed
+                  }
+    #'''
     root = tk.Tk()
     
     Ordinary_input(root, param_dict)
