@@ -100,8 +100,10 @@ class test_class:
     def test_func(self):
         self.x += 1
         print(self.x)
+        return self.x
 
 class test_class_2(test_class):
     x = 100
     def __init__(self):
-        self.test_func()
+        temp = self.test_func()
+        print(temp)
