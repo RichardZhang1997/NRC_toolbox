@@ -1121,15 +1121,86 @@ class Model_main:
         regressor.compile(loss='mean_squared_error', optimizer=optimizer, metrics=['mse'])#adam to be changed
         return regressor
 
-class Load_model_results():#To be finished
-    def __init__(self, master, load_model, param_dict):
+class Select_train_mode():
+    def __init__(self, master, param_dict, root):
         self.master = master
         self.param_dict = param_dict
-        #self.load_model = load_model#0 means new model; 1 means load previous training results
+        self.root = root
+
+        self.master.title('RNN Model Training Tool-Select Training Mode')
+        self.master.geometry('400x150')
+
+        self.frm_bottom = tk.Frame(self.master)
+
+        self.frm_bottom.pack(side='bottom')
+
+        #3. Training model selection: automatic (0) VS manual (1)
+        if self.param_dict['train_mode_flow'] == 'manual':
+            self.dft_r_3 = tk.IntVar(value=1)
+        elif self.param_dict['train_mode_flow'] == 'automatic':
+            self.dft_r_3 = tk.IntVar(value=0)
+        
+        #3. Training model selection: automatic (0) VS manual (1)
+        self.var_L_6 = tk.StringVar()
+        self.var_L_6.set('Training model selection (Manual mode):')
+        self.Lab_6 = tk.Label(self.frm_bottom, textvariable=self.var_L_6, bg='white', 
+                              font=('Times New Roman', 12), height=1).pack()
+        self.r_3_1 = tk.Radiobutton(self.frm_bottom, text='Automatic', variable=self.dft_r_3, value=0,
+                    command=self.print_r_3_selection)#.place(x=130, y=705, anchor='nw')
+        self.r_3_2 = tk.Radiobutton(self.frm_bottom, text='Manual', variable=self.dft_r_3, value=1,
+                    command=self.print_r_3_selection)#.place(x=190, y=705, anchor='nw')
+        self.r_3_2.pack()
+        self.r_3_1.pack()
+        
+        #1. Update
+        self.btn_updateTrainMode = tk.Button(self.frm_bottom, text = 'Confrim', width = 25, 
+                                  command = self.new_window_trainMode).pack()
+        
+        #3. Training model selection: automatic (0) VS manual (1)
+        if self.dft_r_3 == 0:
+            self.param_dict['train_mode_flow'] = 'automatic'
+        elif self.dft_r_3 == 1:
+            self.param_dict['train_mode_flow'] = 'manual'
+
+    def print_r_3_selection(self):
+        if self.dft_r_3.get() == 0:
+            str_print = '3. Training model selection (Automatic mode):'
+            messagebox.showinfo(title='Automatic mode selected', 
+                                message=
+            '''            By selecting automatic mode, it is about 
+            to take much longer time to find the best 
+            combination of hyperparameters. If you already 
+            know the best combination of them, please 
+            input them into 'advanced settings' and switch to 
+            'Manual' to save time.''')
+            self.param_dict['train_mode_flow'] = 'automatic'
+            #Move 'Select_train_mode' window to the top
+            self.master.lift()
+            #self.master.attributes("-top", True)
+        
+        elif self.dft_r_3.get() == 1:
+            str_print = '3. Training model selection (Manual mode):'
+            self.param_dict['train_mode_flow'] = 'manual'
+        
+        self.var_L_6.set(str_print)
+        return
+    
+    def new_window_trainMode(self):
+        newWindow = tk.Toplevel(self.root)
+        self.app = Load_model_results(newWindow, self.param_dict)
+        self.master.destroy()
+        return
+    
+
+
+class Load_model_results():#To be finished
+    def __init__(self, master, param_dict):
+        self.master = master
+        self.param_dict = param_dict
         
         #If did not record the best_epoch from run_RNN
-        if self.param_dict['best_epoch'] == 0:
-            self.param_dict['best_epoch'] = self.param_dict['max_epochs_flow']
+        #if self.param_dict['best_epoch'] == 0:
+        #    self.param_dict['best_epoch'] = self.param_dict['max_epochs_flow']
 
         self.frm_left = tk.Frame(self.master)
         self.frm_right = tk.Frame(self.master)
@@ -1171,7 +1242,7 @@ class Load_model_results():#To be finished
 
         #2. Hyperparameters
         #print(self.param_dict['train_mode_flow'])
-        if self.param_dict['train_mode_flow'] == 'manual' or load_model == 1:
+        if self.param_dict['train_mode_flow'] == 'manual':
             self.btn_advSet = tk.Button(self.frm_bottom, text = 'Hyperparameters', 
                                         width = 25, command = self.new_window_add).pack()
         #1. Update
@@ -1181,7 +1252,7 @@ class Load_model_results():#To be finished
         self.btn_quit = tk.Button(self.frm_bottom, text = 'Quit', width = 25, 
                                   command = self.close_windows).pack()
         
-        if load_model == 1:
+        if self.param_dict['model_source'] == 'trained':
             #11. Output file directory
             var_L_11 = tk.StringVar()
             var_L_11.set('2. Model weight directory:')
@@ -1215,7 +1286,7 @@ class Load_model_results():#To be finished
         newWindow = tk.Toplevel(self.master)
         self.app = Additional_input(newWindow, self.param_dict)
         return
-    
+
     def close_windows(self):
         self.master.destroy()
         return
@@ -1252,12 +1323,6 @@ class Start_menu:
             self.dft_r_2 = tk.IntVar(value=0)
         elif self.param_dict['model_source'] == 'trained':
             self.dft_r_2 = tk.IntVar(value=1)
-        
-        #3. Training model selection: automatic (0) VS manual (1)
-        if self.param_dict['train_mode_flow'] == 'manual':
-            self.dft_r_3 = tk.IntVar(value=1)
-        elif self.param_dict['train_mode_flow'] == 'automatic':
-            self.dft_r_3 = tk.IntVar(value=0)
         
         #Top
         #Feature file directory
@@ -1302,7 +1367,6 @@ class Start_menu:
         self.btn_conf_data = tk.Button(self.frm_left, text = 'Update Data Source', 
                                   width = 25, command = self.confirmData_btn).pack()
         
-        #Right
         #2. Model source selection
         self.var_L_2 = tk.StringVar()
         self.var_L_2.set('2. Please select the model option\n(new model):')
@@ -1319,18 +1383,7 @@ class Start_menu:
         self.r_2_1.pack()
         self.r_2_2.pack()
                 
-        #3. Training model selection: automatic (0) VS manual (1)
-        
-        self.var_L_6 = tk.StringVar()
-        self.var_L_6.set('3. Training model selection (Manual mode):')
-        self.Lab_6 = tk.Label(self.frm_left, textvariable=self.var_L_6, bg='white', 
-                              font=('Times New Roman', 12), height=1).pack()
-        self.r_3_1 = tk.Radiobutton(self.frm_left, text='Automatic', variable=self.dft_r_3, value=0,
-                    command=self.print_r_3_selection)#.place(x=130, y=705, anchor='nw')
-        self.r_3_2 = tk.Radiobutton(self.frm_left, text='Manual', variable=self.dft_r_3, value=1,
-                    command=self.print_r_3_selection)#.place(x=190, y=705, anchor='nw')
-        self.r_3_2.pack()
-        self.r_3_1.pack()
+
         
 
         #confrim model button
@@ -1345,17 +1398,13 @@ class Start_menu:
         self.btn_quit = tk.Button(self.frm_right, text = 'Quit', width = 25, 
                                   command = self.close_windows).pack()
 
-        #3. Training model selection: automatic (0) VS manual (1)
-        if self.dft_r_3 == 0:
-            self.param_dict['train_mode_flow'] = 'automatic'
-        elif self.dft_r_3 == 1:
-            self.param_dict['train_mode_flow'] = 'manual'
-
     def print_r_1_selection(self):
         if self.dft_r_1.get() == 0:
+            self.param_dict['data_source'] = 'raw' 
             str_print = '1. Please select the data source\n(raw data):'
         
         elif self.dft_r_1.get() == 1:
+            self.param_dict['data_source'] = 'preporcessed'
             str_print = '1. Please select the data source\n(pre-processed data):'
         
         self.var_L_1.set(str_print)
@@ -1363,32 +1412,16 @@ class Start_menu:
     
     def print_r_2_selection(self):
         if self.dft_r_2.get() == 0:
+            self.param_dict['model_source'] = 'new'
             str_print = '2. Please select the model option\n(new model):'
         
         elif self.dft_r_2.get() == 1:
+            self.param_dict['model_source'] = 'trained'
             str_print = '2. Please select the model option\n(trained model):'
         
         self.var_L_2.set(str_print)
         return
-    
-    def print_r_3_selection(self):
-        if self.dft_r_3.get() == 0:
-            str_print = '3. Training model selection (Automatic mode):'
-            messagebox.showinfo(title='Automatic mode selected', 
-                                message=
-            '''            By selecting automatic mode, it is about 
-            to take much longer time to find the best 
-            combination of hyperparameters. If you already 
-            know the best combination of them, please 
-            input them into 'advanced settings' and switch to 
-            'Manual' to save time.''')
-        
-        elif self.dft_r_3.get() == 1:
-            str_print = '3. Training model selection (Manual mode):'
-        
-        self.var_L_6.set(str_print)
-        return
-    
+
     def confirmData_btn(self):
         print('confirmData_btn')
         if self.dft_r_1.get() == 0:
@@ -1409,16 +1442,18 @@ class Start_menu:
         newWindow = tk.Toplevel(self.master)
         if self.dft_r_2.get() == 0:
             print('Training new model window')
-            self.app = Load_model_results(newWindow, self.dft_r_2.get(), self.param_dict)
+            self.app = Select_train_mode(newWindow, self.param_dict, self.master)
         
         elif self.dft_r_2.get() == 1:
             print('Loading previously trained model window')
            
             #newWindow = tk.Toplevel(self.master)
-            self.app = Load_model_results(newWindow, self.dft_r_2.get(), self.param_dict)
+            self.app = Select_train_mode(newWindow, self.param_dict, self.master)
             
-            self.var_L_5.set('Trained model directory:\n'+self.param_dict['model_weight_dir'])
+            self.var_L_5.set('*Trained model directory:*\n'+self.param_dict['model_weight_dir'])
         
+        #newWindow_1 = tk.Toplevel(self.master)
+        #Load_model_results(newWindow_1, self.param_dict)
         self.param_dict['confirm_model'] = True
         return
     
